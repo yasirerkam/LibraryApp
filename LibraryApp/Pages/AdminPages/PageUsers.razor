@@ -1,0 +1,239 @@
+﻿@layout LayoutAdmin
+@page "/adminPages/pageUsers"
+
+@using LibraryApp.Data
+@using LibraryApp.Data.Library
+
+@*
+    Using OwningComponentBase ensures that the service and related services
+    that share its scope are disposed with the component.
+    Otherwise DbContext in LiraryService will live for the life of the
+    connection, which may be problematic if clients stay
+    connected for a long time.
+    We access LiraryService using @Service
+*@
+@inherits OwningComponentBase<LiraryService>
+
+<h3>Users</h3>
+
+@if (users == null)
+{
+    <!-- Show this if the current user has no data... yet... -->
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <!-- Show the users for the current user -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>UserId</th>
+                <th>UserName</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>DateOfBirth</th>
+                <th>Phone</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.UserId</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Name</td>
+                    <td>@user.Surname</td>
+                    <td>@user.Email</td>
+                    <td>@user.DateOfBirth.Value.ToShortDateString()</td>
+                    <td>@user.Phone</td>
+                    <td>
+                        <!-- Edit the current user -->
+                        <button class="btn btn-primary" @onclick="(() => Edit(user))">
+                            Edit
+                        </button>
+                    </td>
+
+                    <!-- Only show delete button if not a new record -->
+                    @if (user.UserId > 0)
+                    {
+                        <td>
+                            <!-- Button to delete the user -->
+                            <button class="btn btn-primary" @onclick="(() => Delete(user))">
+                                Delete
+                            </button>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p>
+        <!-- Add a new user -->
+        <button class="btn btn-primary"
+                @onclick="AddNew">
+            Add New User
+        </button>
+    </p>
+
+    @if (ShowPopup)
+    {
+        <!-- This is the popup to create or edit a user -->
+        <div class="modal" tabindex="-1" style="display:block" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Edit User</h3>
+                        <!-- Button to close the popup -->
+                        <button type="button" class="close" @onclick="ClosePopup">
+                            <span aria-hidden="true">X</span>
+                        </button>
+                    </div>
+                    <!-- Edit form for the current user -->
+                    <div class="modal-body">
+                        <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="text" placeholder="User Name" @bind="objUser.UserName" />
+                        <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="text" placeholder="Password" @bind="objUser.Password" />
+                        <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="text" placeholder="Name" @bind="objUser.Name" />
+                        <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="text" placeholder="Surname" @bind="objUser.Surname" />
+                        <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="text" placeholder="Email" @bind="objUser.Email" />
+                        <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="date" placeholder="Birth Date" @bind="objUser.DateOfBirth" />
+                        <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="text" placeholder="Phone" @bind="objUser.Phone" />
+                        <br />
+
+                        <!-- Button to save the user -->
+                        <button style="margin-top:10px" class="btn btn-primary" @onclick="Save">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+}
+
+@code
+    {
+    public List<User>
+    users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await @Service.GetUsersAsync();
+    }
+
+    private bool addingNew = false;
+    private User objUser = new User();
+    private bool ShowPopup = false;
+
+    private void ClosePopup()
+    {
+        addingNew = false;
+
+        // Close the Popup
+        ShowPopup = false;
+    }
+
+    private void AddNew()
+    {
+        // Make new user
+        objUser = new User();
+
+        addingNew = true;
+
+        // Open the Popup
+        ShowPopup = true;
+    }
+
+    private async Task Save()
+    {
+        // Close the Popup
+        ShowPopup = false;
+
+        // A new user will have the Id set to 0
+        if (addingNew)
+        {
+            addingNew = false;
+
+            // Create new user
+            User userNew = new User();
+            userNew.UserName = objUser.UserName;
+            userNew.Password = objUser.Password;
+            userNew.Name = objUser.Name;
+            userNew.Surname = objUser.Surname;
+            userNew.Email = objUser.Email;
+            userNew.DateOfBirth = objUser.DateOfBirth;
+            userNew.Phone = objUser.Phone;
+
+            // Save the result
+            var result = @Service.CreateUserAsync(userNew);
+
+        }
+        else
+        {
+            // This is an update
+            var result = @Service.UpdateUserAsync(objUser);
+        }
+        // Get the users for the current user
+        users = await @Service.GetUsersAsync();
+    }
+
+    private void Edit(User user)
+    {
+        // Set the selected user as the current user
+        objUser = user;
+
+        // Open the Popup
+        ShowPopup = true;
+    }
+
+    private async Task Delete(User user)
+    {
+        // Close the Popup
+        ShowPopup = false;
+
+        // Delete the user
+        var result = @Service.DeleteUserAsync(user);
+
+        // Get the users for the current user
+        users = await @Service.GetUsersAsync();
+    }
+}
+
+@*  <!-- Show the users for the current user -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>UserId</th>
+                <th>UserName</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>DateOfBirth</th>
+                <th>Phone</th>
+                <th>BookName</th>
+                <th>Isbn</th>
+                <th>Author</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+            <tr>
+                <td>@user.UserId</td>
+                <td>@user.UserName</td>
+                <td>@user.Name</td>
+                <td>@user.Surname</td>
+                <td>@user.Email</td>
+                <td>@user.DateOfBirth</td>
+                <td>@user.Phone</td>
+                <td>@user.BookName</td>
+                <td>@user.Isbn</td>
+                <td>@user.Author</td>
+                <td>@user.Date</td>
+            </tr>
+            }
+        </tbody>
+    </table>*@

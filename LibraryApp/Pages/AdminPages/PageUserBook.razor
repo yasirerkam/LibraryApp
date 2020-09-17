@@ -1,0 +1,163 @@
+﻿@layout LayoutAdmin
+@page "/adminPages/pageUserBook"
+
+@using LibraryApp.Data
+@using LibraryApp.Data.Library
+
+@*
+    Using OwningComponentBase ensures that the service and related services
+    that share its scope are disposed with the component.
+    Otherwise DbContext in LiraryService will live for the life of the
+    connection, which may be problematic if clients stay
+    connected for a long time.
+    We access LiraryService using @Service
+*@
+@inherits OwningComponentBase<LiraryService>
+
+<h1>Lent Books</h1>
+
+@if (userBooks == null)
+{
+    <!-- Show this if the current user has no data... yet... -->
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <!-- Show the forecasts for the current user -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User Name</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Book Name</th>
+                <th>Lent Date</th>
+                <th>Return Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var userBook in userBooks)
+            {
+                <tr>
+                    <td>@userBook.UserName</td>
+                    <td>@userBook.Name</td>
+                    <td>@userBook.Surname</td>
+                    <td>@userBook.BookName</td>
+                    <td>@userBook.DateLent.Date.ToShortDateString()</td>
+                    <td>@userBook.DateReturn.Date.ToShortDateString()</td>
+                    <td>
+                        <!-- Edit the current forecast -->
+                        <button class="btn btn-primary" @onclick="(() => Edit(userBook))">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@if (ShowPopup)
+{
+    <!-- This is the popup to create or edit a user -->
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Edit User</h3>
+                    <!-- Button to close the popup -->
+                    <button type="button" class="close" @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <!-- Edit form for the current user -->
+                <div class="modal-body">
+                    <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="date" placeholder="Date Lent" @bind="objUserBook.DateLent" />
+                    <input class="form-control" style="margin-bottom:5px; margin-top:5px" type="date" placeholder="Date Return" @bind="objUserBook.DateReturn" />
+                    <br />
+
+                    <!-- Button to save the user -->
+                    <button style="margin-top:10px" class="btn btn-primary" @onclick="Save">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code
+    {
+
+    private dynamic userBooks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userBooks = await @Service.GetUsersBookAsync();
+    }
+
+    private bool addingNew = false;
+    private UserBook objUserBook = new UserBook();
+    private bool ShowPopup = false;
+
+    private void ClosePopup()
+    {
+        addingNew = false;
+
+        // Close the Popup
+        ShowPopup = false;
+    }
+
+    private async Task Save()
+    {
+
+        // Close the Popup
+        ShowPopup = false;
+
+        // A new forecast will have the Id set to 0
+        if (addingNew)
+        {
+
+        }
+        else
+        {
+            // This is an update
+            var result = @Service.UpdateUserBookAsync(objUserBook);
+        }
+        // Get the forecasts for the current user
+        userBooks = await @Service.GetUsersBookAsync();
+    }
+
+    private Task<UserBook> Edit(dynamic user)
+    {
+        // Set the selected user as the current user
+        objUserBook = new UserBook();
+        objUserBook.UserBookId = user.UserBookId;
+        objUserBook.UserId = user.UserId;
+        objUserBook.BookId = user.BookId;
+        objUserBook.DateLent = user.DateLent;
+        objUserBook.DateReturn = user.DateReturn;
+
+        // Open the Popup
+        ShowPopup = true;
+
+        return Task.FromResult(objUserBook);
+
+    }
+
+    /*
+    private async Task Delete(UserBook user)
+    {
+    // Close the Popup
+    ShowPopup = false;
+
+    // Delete the forecast
+    var result = @Service.DeleteUserBookAsync(user);
+
+    // Get the forecasts for the current user
+    userBooks = await @Service.GetUserBooksAsync();
+    }
+    */
+
+}

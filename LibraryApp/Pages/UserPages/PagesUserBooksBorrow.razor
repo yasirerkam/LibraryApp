@@ -1,0 +1,141 @@
+﻿@layout LayoutUser
+@page "/userPages/pagesUserBooksBorrow"
+
+@using System.IO;
+@using Services;
+@using LibraryApp.Data
+@using LibraryApp.Data.Library
+@inherits OwningComponentBase<LiraryService>
+
+@inject Tesseract Tesseract
+@inject IFileReaderService fileReaderService;
+
+<style>
+
+    input.clickable {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        margin-top: -20px;
+        margin-left: -20px;
+        cursor: pointer;
+    }
+</style>
+
+<h1>Borrow Book</h1>
+<br />
+<br />
+<br />
+<h2>@AppDataService.Instance.userSigned.Name Books</h2>
+<br />
+
+@if (myBooks == null)
+{
+    <!-- Show this if the current book has no data... yet... -->
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <!-- Show the forecasts for the current book -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>BookId</th>
+                <th>BookName</th>
+                <th>Isbn</th>
+                <th>Author</th>
+                <th>Date Lent</th>
+                <th>Date Return</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (dynamic userBook in myBooks)
+            {
+                <tr>
+                    <td>@userBook.BookId</td>
+                    <td>@userBook.BookName</td>
+                    <td>@userBook.Isbn</td>
+                    <td>@userBook.Author</td>
+                    <td>@userBook.DateLent.Date.ToShortDateString()</td>
+                    <td>@userBook.DateReturn.Date.ToShortDateString()</td>
+                    <td>
+                        <!-- Edit the current forecast -->
+                        <button class="btn btn-primary" @onclick="(() => Return(userBook.BookId))">
+                            Return
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<h2>Books</h2>
+<br />
+
+@if (books == null)
+{
+    <!-- Show this if the current book has no data... yet... -->
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <!-- Show the forecasts for the current book -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>BookId</th>
+                <th>BookName</th>
+                <th>Isbn</th>
+                <th>Author</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Book book in books)
+            {
+                <tr>
+                    <td>@book.BookId</td>
+                    <td>@book.BookName</td>
+                    <td>@book.Isbn</td>
+                    <td>@book.Author</td>
+
+                    <td>
+                        <!-- Edit the current forecast -->
+                        <button class="btn btn-primary" @onclick="(() => Borrow(book))">
+                            Take
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div style="float:left; ">
+        <input class="inputLogin" style="margin-right:30px; margin-bottom:5px;" type="text" placeholder="Book Name" @onchange="OnSearchBookNameInputChange" />
+        <input class="inputLogin" style="margin-bottom:5px; margin-top:5px" type="text" placeholder="Isbn" @onchange="OnSearchIsbnInputChange" />
+    </div>
+
+}
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+@code {
+
+}

@@ -1,0 +1,38 @@
+﻿{
+   "ContextClassName": "LibraryContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "DoNotCombineNamespace": false,
+   "IdReplace": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Data\\Library",
+   "ProjectRootNamespace": "LibraryApp",
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Admin]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[Book]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[User]"
+      },
+      {
+         "HasPrimaryKey": true,
+         "Name": "[dbo].[UserBook]"
+      }
+   ],
+   "UseDatabaseNames": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseSpatial": false
+}

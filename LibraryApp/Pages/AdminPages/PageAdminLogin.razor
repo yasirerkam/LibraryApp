@@ -1,0 +1,83 @@
+﻿@page "/adminPages/pageAdminLogin"
+
+@using Services;
+@using LibraryApp.Data
+@using LibraryApp.Data.Library
+@using LibraryApp.Services
+@inject NavigationManager NavigationManager
+@inject Tesseract Tesseract
+
+@inherits OwningComponentBase<LiraryService>
+
+<div class="main" style="margin-top: 10%;">
+
+    <h1 class="text-center">Socrates Library (Admin)</h1>
+    <br />
+
+    <!-- <form method="post">
+        <label for="fname">Kullanıcı Adı : </label>
+        <input type="text" id="uname" name="uname"><br><br>
+        <label for="lname">Şifre : </label>
+        <input type="text" id="passwd" name="passwd"><br><br>
+        <label for="lname"></label>
+        <button>Giriş</button>
+    </form> -->
+
+    <div class="text-center">
+        <label class="labelLogin" for="uname">Kullanıcı Adı : </label>
+        <input class="inputLogin" type="text" id="uname" name="uname" @bind="AdminName" @bind:event="oninput"><br><br>
+
+        <label class="labelLogin" for="passwd">Şifre :</label>
+        <input class="inputLogin" type="text" id="passwd" name="passwd" @bind="Password" @bind:event="oninput"><br><br><br>
+
+        <button class="btn btn-primary" @onclick="CheckPasswd">Login</button>
+        <button class="btn btn-dark" @onclick="ChangeToUserLogin">User Login</button>
+    </div>
+</div>
+
+@code {
+    private string AdminName { get; set; }
+    private string Password { get; set; }
+
+    public string sonuc { get; set; }
+
+    private void CheckPasswd()
+    {
+
+        Admin admin = @Service.FindAdmin(AdminName);
+
+        if (admin != null)
+        {
+
+            if (admin.Password.Trim() == Password)
+            {
+                AppDataService.Instance.adminSigned = admin;
+                NavigationManager.NavigateTo("/adminPages/pageAdminWelcome");
+                Console.WriteLine("logged in");
+
+            }
+            else
+            {
+                Console.WriteLine(AdminName + ", incorret password : " + Password);
+                Console.WriteLine(admin.AdminName + ", incorret password : '" + admin.Password.Trim() + "'");
+            }
+        }
+
+    }
+
+    protected override void OnInitialized()
+    {
+        AppDataService.Instance.OnChange += MyEventHandler;
+    }
+    private void MyEventHandler()
+    {
+        sonuc = AppDataService.Instance.TessTextList[0];
+    }
+
+    private void ChangeToUserLogin()
+    {
+        NavigationManager.NavigateTo("/");
+
+    }
+
+}

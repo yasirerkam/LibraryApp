@@ -1,0 +1,26 @@
+﻿@layout LayoutEmptyMain
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<div class="sidebar" style="margin:-10px 0px -10px -10px;">
+    <NavMenuUser />
+</div>
+
+<div class="main" style="margin:-10px -10px -10px 0px;">
+    <div class="top-row px-4">
+        <button class="btn btn-danger" @onclick="ChangePage">Exit</button>
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+@code{
+
+    private void ChangePage()
+    {
+        NavigationManager.NavigateTo("/");
+
+    }
+}
